@@ -23,9 +23,11 @@ var path = require('path');
 [1, 2, 4].forEach(function(pxRatio) {
     var svgs = glob.sync(path.resolve(path.join(__dirname, 'input/*.svg')))
         .map(function(f) {
+            var extname = path.extname(f)
             return {
                 svg: fs.readFileSync(f),
-                id: path.basename(f).replace('.svg', '')
+                id: path.basename(f).replace(extname, ''),
+                format: extname.substring(1) // If the image format is SVG, it can be ignored.
             };
         });
     var pngPath = path.resolve(path.join(__dirname, 'output/sprite@' + pxRatio + '.png'));
