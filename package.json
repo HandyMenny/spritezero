@@ -1,12 +1,12 @@
 {
-  "name": "@mapbox/spritezero",
+  "name": "@handymenny/spritezero",
   "version": "8.0.3",
   "main": "./index.js",
   "description": "small opinionated sprites",
   "author": "Tom MacWright",
   "license": "ISC",
-  "repository": "mapbox/spritezero",
-  "bugs": "https://github.com/mapbox/spritezero/issues",
+  "repository": "handymenny/spritezero",
+  "bugs": "https://github.com/handymenny/spritezero/issues",
   "keywords": [
     "sprite",
     "images",
