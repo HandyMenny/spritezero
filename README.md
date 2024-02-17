@@ -25,7 +25,7 @@ var path = require('path');
         .map(function(f) {
             var extname = path.extname(f)
             return {
-                svg: fs.readFileSync(f),
+                buf: fs.readFileSync(f),
                 id: path.basename(f).replace(extname, ''),
                 format: extname.substring(1) // If the image format is SVG, it can be ignored.
             };

@@ -16,7 +16,7 @@ function filepaths (dir) {
 function loadFile (file, callback) {
     fs.readFile(file, function (err, res) {
         return callback(err, {
-            svg: res,
+            buf: res,
             id: path.basename(file).replace('.svg', '')
         });
     });

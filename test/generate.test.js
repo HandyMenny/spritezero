@@ -13,7 +13,7 @@ var emptyPNG = new mapnik.Image(1, 1).encodeSync('png');
 
 const fixtures = glob.sync(path.resolve(path.join(__dirname, '/fixture/svg/*.svg'))).map(function(im) {
     return {
-        svg: fs.readFileSync(im),
+        buf: fs.readFileSync(im),
         id: path.basename(im).replace('.svg', '')
     };
 });
@@ -227,11 +227,11 @@ test('generateLayout relative width/height SVG returns empty', function(t) {
     var fixtures = [
       {
         id: 'relative-dimensions',
-        svg: fs.readFileSync('./test/fixture/relative-dimensions.svg')
+        buf: fs.readFileSync('./test/fixture/relative-dimensions.svg')
       },
       {
         id: 'art',
-        svg: fs.readFileSync('./test/fixture/svg/art-gallery-18.svg')
+        buf: fs.readFileSync('./test/fixture/svg/art-gallery-18.svg')
       }
     ];
 
@@ -246,7 +246,7 @@ test('generateLayout only relative width/height SVG returns empty sprite object'
     var fixtures = [
       {
         id: 'relative-dimensions',
-        svg: fs.readFileSync('./test/fixture/relative-dimensions.svg')
+        buf: fs.readFileSync('./test/fixture/relative-dimensions.svg')
       }
     ];
 
@@ -266,11 +266,11 @@ test('generateLayout containing image with no width or height SVG', function(t) 
     var fixtures = [
       {
         id: 'no-width-or-height',
-        svg: fs.readFileSync('./test/fixture/no-width-or-height.svg')
+        buf: fs.readFileSync('./test/fixture/no-width-or-height.svg')
       },
       {
         id: 'art',
-        svg: fs.readFileSync('./test/fixture/svg/art-gallery-18.svg')
+        buf: fs.readFileSync('./test/fixture/svg/art-gallery-18.svg')
       }
     ];
 
@@ -285,7 +285,7 @@ test('generateLayout containing only image with no width or height', function(t)
     var fixtures = [
         {
           id: 'no-width-or-height',
-          svg: fs.readFileSync('./test/fixture/no-width-or-height.svg')
+          buf: fs.readFileSync('./test/fixture/no-width-or-height.svg')
         }
       ];
 
@@ -305,7 +305,7 @@ test('generateLayout with extractMetadata option set to false', function (t) {
     var fixtures = [
         {
             id: 'cn',
-            svg: fs.readFileSync('./test/fixture/svg-metadata/cn-nths-expy-2-affinity.svg')
+            buf: fs.readFileSync('./test/fixture/svg-metadata/cn-nths-expy-2-affinity.svg')
         }
     ];
 
@@ -320,7 +320,7 @@ test('generateLayout without extractMetadata option set (defaults to true)', fun
     var fixtures = [
         {
             id: 'cn',
-            svg: fs.readFileSync('./test/fixture/svg-metadata/cn-nths-expy-2-affinity.svg')
+            buf: fs.readFileSync('./test/fixture/svg-metadata/cn-nths-expy-2-affinity.svg')
         }
     ];
 
@@ -335,7 +335,7 @@ test('generateLayout without extractMetadata option set (defaults to true) when 
     var fixtures = [
         {
             id: 'cn',
-            svg: fs.readFileSync('./test/fixture/svg-metadata/cn-nths-expy-2-affinity.svg')
+            buf: fs.readFileSync('./test/fixture/svg-metadata/cn-nths-expy-2-affinity.svg')
         }
     ];
 
@@ -350,7 +350,7 @@ test('generateLayout with both placeholder and stretch zone', function (t) {
     var fixtures = [
         {
             id: 'au-national-route-5',
-            svg: fs.readFileSync('./test/fixture/svg-metadata/au-national-route-5.svg')
+            buf: fs.readFileSync('./test/fixture/svg-metadata/au-national-route-5.svg')
         }
     ];
     spritezero.generateLayout({ imgs: fixtures, pixelRatio: 1, format: true }, function (err, formatted) {
