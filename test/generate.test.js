@@ -18,10 +18,37 @@ const fixtures = glob.sync(path.resolve(path.join(__dirname, '/fixture/svg/*.svg
     };
 });
 
+const pngFixtures = glob.sync(path.resolve(path.join(__dirname, '/fixture/png/*.png'))).map(function(im) {
+    const extname = path.extname(im);
+    return {
+        buf: fs.readFileSync(im),
+        id: path.basename(im).replace(extname, ''),
+        format: extname.substring(1)
+    };
+});
+
 function getFixtures() {
     return fixtures.sort(function() {
         return Math.random() - 0.5;
     });
+}
+
+function getPngFixtures() {
+    return pngFixtures.sort(function() {
+        return Math.random() - 0.5;
+    });
+}
+
+function getMixedFixtures() {
+    const half = Math.ceil(fixtures.length / 2);
+    const svgHalf = fixtures.slice(0).sort(function(a, b) {
+        return a.id - b.id;
+    }).slice(0, half);
+    const pngHalf = pngFixtures.slice(0).sort(function(a, b) {
+        return a.id - b.id;
+    }).slice(half);
+    const combinedArray = svgHalf.concat(pngHalf);
+    return combinedArray;
 }
 
 test('generateLayout', function(t) {
@@ -372,4 +399,113 @@ test('generateLayout with both placeholder and stretch zone', function (t) {
         );
         t.end();
     });
+});
+
+test('generateLayout from unsupported format', function(t) {
+    spritezero.generateLayout({ imgs: [{id: 'test', buf: new Buffer.from(''), format: 'bmp' }], pixelRatio: 1, format: false }, function(err, layout) {
+        t.ok(err);
+        t.notOk(layout);
+        t.equal(err.message, 'only svg and png images supported');
+        t.end();
+    });
+});
+
+
+test('generateLayout from png with icon size filter', function(t) {
+    spritezero.generateLayout({ imgs: getPngFixtures(), pixelRatio: 1, format: false, removeOversizedIcons: true, maxIconSize: 15 }, function(err, layout) {
+        t.ifError(err);
+        t.equal(layout.items.length, 119);
+        t.equal(layout.items[0].x, 0);
+        t.equal(layout.items[0].y, 0);
+        t.end();
+    });
+});
+
+
+test('generateImage unique from png with max_size', function(t) {
+    spritezero.generateLayoutUnique({ imgs: getPngFixtures(), pixelRatio: 1, format: false, maxIconSize: 10 }, function(err, layout) {
+        t.ok(err);
+        t.notOk(layout);
+        t.equal(err.message, 'image created from bytes must be 10 pixels or fewer on each side');
+        t.end();
+    });
+});
+
+test('generateImage from png', function(t) {
+    [1, 2, 4].forEach(function(scale) {
+        t.test('@' + scale, function(tt) {
+            var pngPath = path.resolve(path.join(__dirname, 'fixture/sprite-png.png'));
+            var jsonPath = path.resolve(path.join(__dirname, 'fixture/sprite-png.json'));
+            spritezero.generateLayout({ imgs: getPngFixtures(), pixelRatio: scale, format: true }, function(err, formatted) {
+                tt.ifError(err);
+                spritezero.generateLayout({ imgs: getPngFixtures(), pixelRatio: scale, format: false }, function(err, layout) {
+                    tt.ifError(err);
+                    if (update) fs.writeFileSync(jsonPath, stringify(formatted, { space: '  ' }));
+                    tt.deepEqual(formatted, JSON.parse(fs.readFileSync(jsonPath)));
+
+                    spritezero.generateImage(layout, function(err, res) {
+                        tt.notOk(err, 'no error');
+                        tt.ok(res, 'produces image');
+                        if (update) fs.writeFileSync(pngPath, res);
+                        tt.ok(Math.abs(res.length - fs.readFileSync(pngPath).length) < 1000);
+                        tt.end();
+                    });
+                });
+            });
+        });
+    });
+    t.end();
+});
+
+test('generateImageUnique from png', function(t) {
+    [1, 2, 4].forEach(function(scale) {
+        t.test('@' + scale, function(tt) {
+            var pngPath = path.resolve(path.join(__dirname, 'fixture/sprite-uniq-png.png'));
+            var jsonPath = path.resolve(path.join(__dirname, 'fixture/sprite-uniq-png.json'));
+            spritezero.generateLayoutUnique({ imgs: getPngFixtures(), pixelRatio: scale, format: true }, function(err, formatted) {
+                tt.ifError(err);
+                spritezero.generateLayoutUnique({ imgs: getPngFixtures(), pixelRatio: scale, format: false }, function(err, layout) {
+                    tt.ifError(err);
+                    if (update) fs.writeFileSync(jsonPath, stringify(formatted, { space: '  ' }));
+                    tt.deepEqual(formatted, JSON.parse(fs.readFileSync(jsonPath)));
+
+                    spritezero.generateImage(layout, function(err, res) {
+                        tt.notOk(err, 'no error');
+                        tt.ok(res, 'produces image');
+                        if (update) fs.writeFileSync(pngPath, res);
+                        tt.ok(Math.abs(res.length - fs.readFileSync(pngPath).length) < 1000);
+                        tt.end();
+                    });
+                });
+            });
+        });
+    });
+    t.end();
+});
+
+test('generateImage from png and svg', function(t) {
+    [1, 2, 4].forEach(function(scale) {
+        t.test('@' + scale, function(tt) {
+            var pngPath = path.resolve(path.join(__dirname, 'fixture/sprite-mixed@' + scale + '.png'));
+            var jsonPath = path.resolve(path.join(__dirname, 'fixture/sprite-mixed@' + scale + '.json'));
+            var fixtures = getMixedFixtures();
+            spritezero.generateLayout({ imgs: fixtures, pixelRatio: scale, format: true }, function(err, formatted) {
+                tt.ifError(err);
+                spritezero.generateLayout({ imgs: fixtures, pixelRatio: scale, format: false }, function(err, layout) {
+                    tt.ifError(err);
+                    if (update) fs.writeFileSync(jsonPath, stringify(formatted, { space: '  ' }));
+                    tt.deepEqual(formatted, JSON.parse(fs.readFileSync(jsonPath)));
+
+                    spritezero.generateImage(layout, function(err, res) {
+                        tt.notOk(err, 'no error');
+                        tt.ok(res, 'produces image');
+                        if (update) fs.writeFileSync(pngPath, res);
+                        tt.ok(Math.abs(res.length - fs.readFileSync(pngPath).length) < 1000);
+                        tt.end();
+                    });
+                });
+            });
+        });
+    });
+    t.end();
 });
